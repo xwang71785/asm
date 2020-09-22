@@ -16,13 +16,21 @@ SUCCESS 	equ 0 		; success code
 STDIN 		equ 0 		; standard input
 STDOUT 		equ 1 		; standard output
 STDERR 		equ 2 		; standard error
+
 SYS_read 	equ 0 		; read
 SYS_write 	equ 1 		; write
 SYS_open 	equ 2 		; file open
 SYS_close 	equ 3 		; file clos
+
+SYS_socket	equ 41		; create socket rdi=2, rsi=1, rdx=0, return socket descriptor in rax
+SYS_connect	equ 42
+SYS_accept	equ 43
+SYS_bind	equ 49		; bind socket rdi=socket_fd, rsi=socket address, rdx=length of socket address
+SYS_listen	equ 50		; listen on the socket after bind succeeded, rsi=1
+
 SYS_fork 	equ 57 		; fork
 SYS_exit 	equ 60 		; terminate
-SYS_create 	equ 85 		; file open/create
+SYS_creat 	equ 85 		; file open/create
 SYS_time 	equ 201 	; get time
 O_CREATE 	equ 0x40
 O_TRUNC 	equ 0x200
@@ -178,7 +186,7 @@ printStr:	push rbp
 			mov rdx, 0
 CountLoop:	cmp byte [rbx], NULL
 			je CountDone
-			inc rdx
+			inc rdx ; number of bytes to be printed
 			inc rbx
 			jmp CountLoop
 CountDone:	cmp rdx, 0
