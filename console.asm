@@ -2,7 +2,7 @@
 ; Version : Assembly X86-64 NASM 2.14.02
 ; Author : Assembly Languange programming with Ubuntu
 ; Description : A simple assembly app demonstrating the 
-; use of Linux INT 80H syscalls to display text.
+; use of Linux 
 ; Build using these commands:
 ; nasm -f elf64 -g -F stabs console.asm
 ; ld -o console console.o
@@ -38,23 +38,23 @@ _start:		nop
 			mov rdi, pmpt 
 			call printStr
 
-			mov rbx, inLine
-			mov r12, 0
+			mov rbx, inLine			; 内存指针，指向预留字符串空间
+			mov r12, 0				; 已读字符个数计数器置零
 readChr:	mov rax, SYS_read
 			mov rdi, STDIN
 			lea rsi, [chr]
-			mov rdx, 1
+			mov rdx, 1				; 每次读入一个字符
 			syscall
 
 			mov al, byte [chr]
-			cmp al, LF 
+			cmp al, LF 				; 判断是否达到字符串尾
 			je readDone
 
 			inc r12
-			cmp r12, STRLEN 
-			jge readChr 
+			cmp r12, STRLEN 		; 如果读取的字符串长度超过预设的长度
+			jge readChr 			; 直接读取下一个字符，不存入内存
 
-			mov byte [rbx], al
+			mov byte [rbx], al		; 读取的字符存入指定内存
 			inc rbx
 			jmp readChr 
 
@@ -67,10 +67,18 @@ exit:		mov rax, SYS_exit
 			mov rdi, SUCCESS
 			syscall
 
+; ******************************************************
+; Generic procedure to display a string to the screen.
+; String must be NULL terminated.
+; Arguments:
+; 1) address, string in rdi
+; Returns:
+; nothing
 			global printStr 		; before calling, store address of string to rdi
-printStr:	push rbp
-			mov rbp, rsp
-			push rbx
+printStr:	push rbp				; 实现功能前用栈保护当前寄存器环境
+			mov rbp, rsp			; 压入rbp，再把rbp指向被压入的rbp
+			push rbx				; Callee中要用到rbx，先把rbx压入栈中
+
 			mov rbx, rdi			; rbx point to address of head of string
 			mov rdx, 0
 countLoop:	cmp byte [rbx], NULL
@@ -78,14 +86,14 @@ countLoop:	cmp byte [rbx], NULL
 			inc rdx					; rdx count to write
 			inc rbx					; moving rbx point along the string
 			jmp countLoop
-countDone:	cmp rdx, 0
-			je prtDone
+countDone:	cmp rdx, 0				; 停止计数后，判断字符串长度是否为0
+			je prtDone 				; 如果为0，则跳过输出，结束
 
 			mov rax, SYS_write 		; system code for write
 			mov rsi, rdi			; address of chars to write
 			mov rdi, STDOUT 		; output to screen
 			syscall 
 
-prtDone:	pop rbx
-			pop rbp
+prtDone:	pop rbx					; 恢复rbx
+			pop rbp					; 恢复rbp
 			ret

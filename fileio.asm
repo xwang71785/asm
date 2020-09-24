@@ -2,7 +2,7 @@
 ; Version : Assembly X86-64 NASM 2.14.02
 ; Author : Assembly Languange programming with Ubuntu
 ; Description : A simple assembly app demonstrating the 
-; use of Linux INT 80H syscalls to display text.
+; use of Linux 
 ; Build using these commands:
 ; nasm -f elf64 -g -F stabs fileio.asm
 ; ld -o fileio fileio.o
@@ -38,9 +38,9 @@ O_APPEND 	equ 0x400
 O_RDONLY 	equ 000000q ; read only
 O_WRONLY 	equ 000001q ; write only
 O_RDWR 		equ 000002q ; read and write
-S_IRUSR 	equ 00400q
-S_IWUSR 	equ 00200q
-S_IXUSR 	equ 00100q
+S_IRUSR 	equ 00400q	; read permission
+S_IWUSR 	equ 00200q	; write permission
+S_IXUSR 	equ 00100q	; execute permission
 ; 
 ;Variables/constants for main.
 BUFF_SIZE 	equ 255
@@ -83,7 +83,7 @@ createFile:	mov rax, SYS_create ; file open/create
 ; Returns:
 ; if error > rax < 0
 ; if success > rax = count of characters actually read
-			mov rax, SYS_write
+writeFile:	mov rax, SYS_write
 			mov rdi, qword [fileDescriptor]
 			mov rsi, url
 			mov rdx, qword [len]
@@ -94,6 +94,7 @@ createFile:	mov rax, SYS_create ; file open/create
 			mov rdi, writeDone
 			call printStr
 			jmp exit
+
 ; Attempt to open file.
 ; Use system service for file open
 ; System Service Open
@@ -124,7 +125,7 @@ openFile:	mov rax, SYS_open ; file open
 ; Returns:
 ; if error > rax < 0
 ; if success > rax = count of characters actually read
-			mov rax, SYS_read
+readFile:	mov rax, SYS_read
 			mov rdi, qword [fileDescriptor]
 			mov rsi, readBuffer
 			mov rdx, BUFF_SIZE
@@ -142,7 +143,7 @@ openFile:	mov rax, SYS_open ; file open
 ; System Service close
 ; rax = SYS_close
 ; rdi = file descriptor
-			mov rax, SYS_close
+closeFile:	mov rax, SYS_close
 			mov rdi, qword [fileDescriptor]
 			syscall
 			jmp exit

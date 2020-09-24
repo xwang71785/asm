@@ -40,15 +40,12 @@ _start:
 ; rsp = argc
 ; rsp+8 = argv
 			mov r12, rdi ; save for later use...
-			mov r13, rsi
-			mov r12, [rsp]
+			mov r13, rsi ; 
+			pop r12 
 			mov r13, rsp ; for _start
-			add r13, 8
 ; Simple loop to display each argument to the screen.
 ; Each argument is a NULL terminated string, so can just
 ; print directly.
-printArg:	mov rdi, newLine
-			call printStr
 			mov rbx, 0
 printLoop:	mov rdi, qword [r13+rbx*8]
 			call printStr
